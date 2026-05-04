@@ -13,3 +13,5 @@ index.md
 /ciclogs
 *.show
 *.log
+/cicjavasrc
+*.DotSettings.user

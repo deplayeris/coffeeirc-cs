@@ -32,17 +32,21 @@ namespace io.github.deplayeris.coffeeirc.cdte;
 public class CDTE
 {
     private static CancellationTokenSource cancellationTokenSource = new();
+    private static readonly object consoleLock = new object();
     
     public static async Task Main(string[] args)
     {
         // 启动消息读取任务
         var readTask = ReadShowAsync();
         
-        Console.WriteLine("CDTE - CIC 官方测试开发发行版");
-        Console.WriteLine($"版本：{SwInfoe.Version}");
-        Console.WriteLine($"状态：{SwInfoe.SoftwareStatus}");
-        Console.WriteLine($"代号：{SwInfoe.VerCodename}");
-        Console.WriteLine();
+        lock (consoleLock)
+        {
+            Console.WriteLine("CDTE - CIC 官方测试开发发行版");
+            Console.WriteLine($"版本：{SwInfoe.Version}");
+            Console.WriteLine($"状态：{SwInfoe.SoftwareStatus}");
+            Console.WriteLine($"代号：{SwInfoe.VerCodename}");
+            Console.WriteLine();
+        }
 
         // 创建客户端实例
         var client = new Client(
@@ -62,12 +66,18 @@ public class CDTE
         if (client.IsConnected())
         {
             await client.SendMessageAsync("Hello, World!");
-            Console.WriteLine("\n提示 ] 消息已发送，您可以在控制台输入消息继续聊天");
-            Console.WriteLine("[提示] 输入 'quit' 或 'exit' 退出程序\n");
+            lock (consoleLock)
+            {
+                Console.WriteLine("\n提示 ] 消息已发送，您可以在控制台输入消息继续聊天");
+                Console.WriteLine("[提示] 输入 'quit' 或 'exit' 退出程序\n");
+            }
         }
         else
         {
-            Console.WriteLine("\n错误 ] 未连接到服务器，无法发送消息");
+            lock (consoleLock)
+            {
+                Console.WriteLine("\n错误 ] 未连接到服务器，无法发送消息");
+            }
         }
         
         // 主循环：读取用户输入
@@ -89,11 +99,17 @@ public class CDTE
             }
             else
             {
-                Console.WriteLine("错误 ] 未连接到服务器");
+                lock (consoleLock)
+                {
+                    Console.WriteLine("错误 ] 未连接到服务器");
+                }
             }
         }
         
-        Console.WriteLine("\n正在关闭客户端...");
+        lock (consoleLock)
+        {
+            Console.WriteLine("\n正在关闭客户端...");
+        }
         
         // 取消读取任务
         cancellationTokenSource.Cancel();
@@ -111,7 +127,10 @@ public class CDTE
         // 清理资源
         client.Close();
         
-        Console.WriteLine("客户端已关闭，按任意键退出...");
+        lock (consoleLock)
+        {
+            Console.WriteLine("客户端已关闭，按任意键退出...");
+        }
         Console.ReadKey();
     }
     
@@ -155,45 +174,47 @@ public class CDTE
                                 {
                                     lastContent = content;
                                     
-                                    // 解析呈现内容
-                                    if (content.StartsWith("[MSG]"))
+                                    lock (consoleLock)
                                     {
-                                        Console.ForegroundColor = ConsoleColor.White;
-                                        Console.WriteLine($"\r[消息] {content.Substring(5)}");
+                                        if (content.StartsWith("[MSG]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.White;
+                                            Console.WriteLine($"\r[消息] {content.Substring(5)}");
+                                        }
+                                        else if (content.StartsWith("[TIP]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Cyan;
+                                            Console.WriteLine($"\r[提示] {content.Substring(5)}");
+                                        }
+                                        else if (content.StartsWith("[ERR]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Red;
+                                            Console.WriteLine($"\r[错误] {content.Substring(5)}");
+                                        }
+                                        else if (content.StartsWith("[WAN]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Yellow;
+                                            Console.WriteLine($"\r[警告] {content.Substring(5)}");
+                                        }
+                                        else if (content.StartsWith("[INF]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Green;
+                                            Console.WriteLine($"\r[信息] {content.Substring(5)}");
+                                        }
+                                        else if (content.StartsWith("[DBG]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.DarkGray;
+                                            Console.WriteLine($"\r[调试] {content.Substring(5)}");
+                                        }
+                                        else if (content.StartsWith("[CHT]"))
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Magenta;
+                                            Console.WriteLine($"\r[聊天] {content.Substring(5)}");
+                                        }
+                                        
+                                        Console.ResetColor();
+                                        Console.Write("> ");
                                     }
-                                    else if (content.StartsWith("[TIP]"))
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Cyan;
-                                        Console.WriteLine($"\r[提示] {content.Substring(5)}");
-                                    }
-                                    else if (content.StartsWith("[ERR]"))
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Red;
-                                        Console.WriteLine($"\r[错误] {content.Substring(5)}");
-                                    }
-                                    else if (content.StartsWith("[WAN]"))
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Yellow;
-                                        Console.WriteLine($"\r[警告] {content.Substring(5)}");
-                                    }
-                                    else if (content.StartsWith("[INF]"))
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Green;
-                                        Console.WriteLine($"\r[信息] {content.Substring(5)}");
-                                    }
-                                    else if (content.StartsWith("[DBG]"))
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                                        Console.WriteLine($"\r[调试] {content.Substring(5)}");
-                                    }
-                                    else if (content.StartsWith("[CHT]"))
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Magenta;
-                                        Console.WriteLine($"\r[聊天] {content.Substring(5)}");
-                                    }
-                                    
-                                    Console.ResetColor();
-                                    Console.Write("> "); // 重新显示输入提示
                                 }
                             }
                         }
