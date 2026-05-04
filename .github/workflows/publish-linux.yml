@@ -32,15 +32,16 @@ jobs:
           -c Release \
           -r linux-x64 \
           -p:PublishAot=true \
-          -p:OutputType=Library
+          -p:OutputType=Library \
+          -o publish/linux-x64
     
-    - name: List native build output
-      run: ls -lh io.github.deplayeris.coffeeirc/bin/Release/net10.0/linux-x64/native
+    - name: List published files
+      run: ls -lh publish/linux-x64
     
     - name: Create tar.gz archive
       run: |
-        cd io.github.deplayeris.coffeeirc/bin/Release/net10.0/linux-x64/native
-        tar -czf ../../../../../coffeeirc-linux-x64.tar.gz *
+        cd publish/linux-x64
+        tar -czf ../../coffeeirc-linux-x64.tar.gz *
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
