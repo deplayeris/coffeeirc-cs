@@ -6,9 +6,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <PublishAot>false</PublishAot>
+        <PublishAot>true</PublishAot>
         <NoWarn>$(NoWarn);1591</NoWarn>
         <StartupObject>io.github.deplayeris.coffeeirc.cdte.CDTE</StartupObject>
     </PropertyGroup>
