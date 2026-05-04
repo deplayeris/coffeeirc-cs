@@ -47,9 +47,9 @@ jobs:
     - name: Create tar.gz archives
       run: |
         cd io.github.deplayeris.coffeeirc/bin/Release/net10.0/osx-x64/native
-        tar -czf ../../../../../coffeeirc-macos-x64.tar.gz *
+        tar -czf $GITHUB_WORKSPACE/coffeeirc-macos-x64.tar.gz *
         cd ../../osx-arm64/native
-        tar -czf ../../../../../coffeeirc-macos-arm64.tar.gz *
+        tar -czf $GITHUB_WORKSPACE/coffeeirc-macos-arm64.tar.gz *
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
