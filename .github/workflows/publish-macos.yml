@@ -1,0 +1,55 @@
+name: Publish macOS
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj
+    
+    - name: Publish for macOS x64
+      run: |
+        dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj \
+          -c Release \
+          -r osx-x64 \
+          --self-contained true \
+          -p:PublishAot=true \
+          -o publish/osx-x64
+    
+    - name: Publish for macOS ARM64 (Apple Silicon)
+      run: |
+        dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj \
+          -c Release \
+          -r osx-arm64 \
+          --self-contained true \
+          -p:PublishAot=true \
+          -o publish/osx-arm64
+    
+    - name: Create tar.gz archives
+      run: |
+        cd publish/osx-x64
+        tar -czf ../../coffeeirc-macos-x64.tar.gz *
+        cd ../osx-arm64
+        tar -czf ../../coffeeirc-macos-arm64.tar.gz *
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: coffeeirc-macos
+        path: |
+          coffeeirc-macos-x64.tar.gz
+          coffeeirc-macos-arm64.tar.gz
+        retention-days: 730

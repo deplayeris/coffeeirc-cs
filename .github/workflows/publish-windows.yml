@@ -1,0 +1,41 @@
+name: Publish Windows
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj
+    
+    - name: Publish for Windows x64
+      run: |
+        dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishAot=true `
+          -o publish/win-x64
+    
+    - name: Create ZIP archive
+      run: |
+        Compress-Archive -Path publish/win-x64/* -DestinationPath coffeeirc-windows-x64.zip
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: coffeeirc-windows-x64
+        path: coffeeirc-windows-x64.zip
+        retention-days: 730
