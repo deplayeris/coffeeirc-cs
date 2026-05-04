@@ -15,3 +15,4 @@ index.md
 *.log
 /cicjavasrc
 *.DotSettings.user
+/publish

@@ -21,30 +21,35 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj
     
-    - name: Publish for macOS x64
+    - name: Publish for macOS x64 (NativeAOT)
       run: |
         dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj \
           -c Release \
           -r osx-x64 \
-          --self-contained true \
           -p:PublishAot=true \
-          -o publish/osx-x64
+          -p:OutputType=Exe
     
-    - name: Publish for macOS ARM64 (Apple Silicon)
+    - name: Publish for macOS ARM64 (NativeAOT)
       run: |
         dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj \
           -c Release \
           -r osx-arm64 \
-          --self-contained true \
           -p:PublishAot=true \
-          -o publish/osx-arm64
+          -p:OutputType=Library
+    
+    - name: List native build output
+      run: |
+        echo "=== macOS x64 ==="
+        ls -lh io.github.deplayeris.coffeeirc/bin/Release/net10.0/osx-x64/native
+        echo "=== macOS ARM64 ==="
+        ls -lh io.github.deplayeris.coffeeirc/bin/Release/net10.0/osx-arm64/native
     
     - name: Create tar.gz archives
       run: |
-        cd publish/osx-x64
-        tar -czf ../../coffeeirc-macos-x64.tar.gz *
-        cd ../osx-arm64
-        tar -czf ../../coffeeirc-macos-arm64.tar.gz *
+        cd io.github.deplayeris.coffeeirc/bin/Release/net10.0/osx-x64/native
+        tar -czf ../../../../../coffeeirc-macos-x64.tar.gz *
+        cd ../../osx-arm64/native
+        tar -czf ../../../../../coffeeirc-macos-arm64.tar.gz *
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

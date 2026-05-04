@@ -26,19 +26,21 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y clang zlib1g-dev
     
-    - name: Publish for Linux x64
+    - name: Publish for Linux x64 (NativeAOT)
       run: |
         dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj \
           -c Release \
           -r linux-x64 \
-          --self-contained true \
           -p:PublishAot=true \
-          -o publish/linux-x64
+          -p:OutputType=Library
+    
+    - name: List native build output
+      run: ls -lh io.github.deplayeris.coffeeirc/bin/Release/net10.0/linux-x64/native
     
     - name: Create tar.gz archive
       run: |
-        cd publish/linux-x64
-        tar -czf ../../coffeeirc-linux-x64.tar.gz *
+        cd io.github.deplayeris.coffeeirc/bin/Release/net10.0/linux-x64/native
+        tar -czf ../../../../../coffeeirc-linux-x64.tar.gz *
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4

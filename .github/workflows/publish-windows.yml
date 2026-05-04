@@ -21,18 +21,20 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj
     
-    - name: Publish for Windows x64
+    - name: Publish for Windows x64 (NativeAOT)
       run: |
         dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj `
           -c Release `
           -r win-x64 `
-          --self-contained true `
           -p:PublishAot=true `
-          -o publish/win-x64
+          -p:OutputType=Library
+    
+    - name: List native build output
+      run: dir io.github.deplayeris.coffeeirc\bin\Release\net10.0\win-x64\native
     
     - name: Create ZIP archive
       run: |
-        Compress-Archive -Path publish/win-x64/* -DestinationPath coffeeirc-windows-x64.zip
+        Compress-Archive -Path io.github.deplayeris.coffeeirc/bin/Release/net10.0/win-x64/native/* -DestinationPath coffeeirc-windows-x64.zip
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
