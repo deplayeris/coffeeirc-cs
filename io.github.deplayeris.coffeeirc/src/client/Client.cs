@@ -28,7 +28,10 @@ SOFTWARE.
  */
 
 
+using System;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -72,6 +75,7 @@ public partial class Client
     private ShowManager showManager;
     private string sIFP = ".show";
     private bool isConnected = false;
+    private bool _isDisposed = false; // 用于防止重复销毁
 
     private StreamWriter? chatLogWriter;
     private string? currentChatLogDate;
@@ -248,9 +252,103 @@ public partial class Client
         clientHttp = new HttpClient();
     }
 
+    /// <summary>
+    /// 导出给非托管代码的句柄创建函数
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "CreateClient", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static IntPtr _CreateClient(
+    
+        int ipProtocol,
+        IntPtr ipPtr,
+        int port,
+        IntPtr nicknamePtr,
+        IntPtr usernamePtr,
+        IntPtr distNamePtr,
+        IntPtr customKeyPtr,
+        IntPtr sIFPPtr
+    )
+    {
+        try
+        {
+            string? ip = Marshal.PtrToStringUTF8(ipPtr);
+            string? nickname = Marshal.PtrToStringUTF8(nicknamePtr);
+            string? username = Marshal.PtrToStringUTF8(usernamePtr);
+            string? distName = Marshal.PtrToStringUTF8(distNamePtr);
+            string? customKey = Marshal.PtrToStringUTF8(customKeyPtr);
+            string? sIFP = Marshal.PtrToStringUTF8(sIFPPtr);
+
+            if (ip == null || nickname == null || username == null || distName == null)
+            {
+                return IntPtr.Zero;
+            }
+
+            var client = new Client(ipProtocol, ip, port, nickname, username, distName, customKey ?? "", sIFP ?? ".show");
+            GCHandle handle = GCHandle.Alloc(client);
+            return GCHandle.ToIntPtr(handle);
+        }
+        catch (Exception)
+        {
+            return IntPtr.Zero;
+        }
+    }
+
+    /// <summary>
+    /// 导出给非托管代码的启动客户端函数
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "StartClient", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static void _StartClient(IntPtr clientHandle)
+    {
+        if (clientHandle == IntPtr.Zero) return;
+
+        try
+        {
+            GCHandle handle = GCHandle.FromIntPtr(clientHandle);
+            if (handle.Target is Client client && !client._isDisposed)
+            {
+                client.StartClient();
+            }
+        }
+        catch (Exception)
+        {
+            // 忽略无效句柄，防止跨语言调用崩溃
+        }
+    }
+    
+    /// <summary>
+    /// 导出给非托管代码的销毁客户端函数
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "DestroyClient", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static void _DestroyClient(IntPtr clientHandle)
+    {
+        if (clientHandle == IntPtr.Zero) return;
+    
+        try
+        {
+            GCHandle handle = GCHandle.FromIntPtr(clientHandle);
+            if (handle.Target is Client client)
+            {
+                
+                if (!client._isDisposed)
+                {
+                    client._isDisposed = true;
+                    client.Close();
+                }
+            }
+            if (handle.IsAllocated)
+            {
+                handle.Free();
+            }
+        }
+        catch (Exception)
+        {
+            // 忽略无效句柄
+        }
+    }
+
+
     public void StartClient()
     {
-        LogInfo("---------------------------------------------------------------------------------");
+    LogInfo("---------------------------------------------------------------------------------");
         LogInfo("[核心信息] 正在使用的 CoffeeIRC 核心的软件信息:");
         LogInfo("        版本号：" + SwInfoc.Version);
         LogInfo("        开发状态：" + SwInfoc.SoftwareStatus);
@@ -803,6 +901,79 @@ public partial class Client
     public string? GetUsername()
     {
         return username;
+    }
+
+    /// <summary>
+    /// 导出给非托管代码的发送消息函数
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "SendMessage", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static void _SendMessage(IntPtr clientHandle, IntPtr messagePtr)
+    {
+    if (clientHandle == IntPtr.Zero || messagePtr == IntPtr.Zero) return;
+
+        try
+        {
+            GCHandle handle = GCHandle.FromIntPtr(clientHandle);
+            if (handle.Target is Client client && !client._isDisposed)
+            {
+                string? message = Marshal.PtrToStringUTF8(messagePtr);
+                if (message != null)
+                {
+                    // 注意：由于 SendMessageAsync 是异步的，在 C 风格接口中我们通常使用 .Wait() 或忽略等待
+                    // 这里为了简单和兼容性，直接调用 Wait。在生产环境中可能需要更复杂的异步句柄管理。
+                    client.SendMessageAsync(message).Wait();
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // 忽略无效句柄或发送错误
+        }
+    }
+
+    /// <summary>
+    /// 导出给非托管代码的断开连接函数
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "Disconnect", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static void _Disconnect(IntPtr clientHandle)
+    {
+    if (clientHandle == IntPtr.Zero) return;
+
+        try
+        {
+            GCHandle handle = GCHandle.FromIntPtr(clientHandle);
+            if (handle.Target is Client client && !client._isDisposed)
+            {
+                client.DisconnectAsync().Wait();
+            }
+        }
+        catch (Exception)
+        {
+            // 忽略无效句柄
+        }
+    }
+
+    /// <summary>
+    /// 导出给非托管代码的连接状态查询函数
+    /// </summary>
+    [UnmanagedCallersOnly(EntryPoint = "IsConnected", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static int _IsConnected(IntPtr clientHandle)
+    {
+    if (clientHandle == IntPtr.Zero) return 0;
+
+        try
+        {
+            GCHandle handle = GCHandle.FromIntPtr(clientHandle);
+            if (handle.Target is Client client && !client._isDisposed)
+            {
+                return client.IsConnected() ? 1 : 0;
+            }
+        }
+        catch (Exception)
+        {
+            // 忽略无效句柄
+        }
+        return 0;
     }
     
 }
