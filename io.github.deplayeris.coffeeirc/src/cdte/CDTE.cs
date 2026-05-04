@@ -39,10 +39,9 @@ public class CDTE
         var readTask = ReadShowAsync();
         
         Console.WriteLine("CDTE - CIC 官方测试开发发行版");
-        Console.WriteLine($"版本：{SwInfoc.Version}");
-        Console.WriteLine($"状态：{SwInfoc.SoftwareStatus}");
-        Console.WriteLine($"代号：{SwInfoc.VerCodename}");
-        Console.WriteLine($"协议：{SwInfoc.Connection}");
+        Console.WriteLine($"版本：{SwInfoe.Version}");
+        Console.WriteLine($"状态：{SwInfoe.SoftwareStatus}");
+        Console.WriteLine($"代号：{SwInfoe.VerCodename}");
         Console.WriteLine();
 
         // 创建客户端实例
