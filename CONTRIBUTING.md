@@ -50,15 +50,22 @@
 ### 作用域说明
 
 常用的作用域包括：
-- `core` - 核心功能
-- `gui` - GUI组件
-- `render` - 渲染系统
-- `event` - 事件系统
-- `util` - 工具类
-- `api` - API接口
-- `config` - 配置系统
-- `i18n` - 国际化
-- `compat` - 兼容性
+- `server` : 服务器模块
+- `client` : 客户端模块
+- `nodenws` : 节点网络服务器模块
+- `api` : API模块
+- `backup` : 备份服务器模块
+- `keyconnection` : 密钥安全信道传输服务器模块
+- `devdocs` : 内部开发文档
+- `docs` : 文档
+- `readme` : README文件
+- `contributing` : CONTRIBUTING文件
+- `codeofconduct` :　CODE_OF_CONDUCT文件
+- `build` : 构建相关
+- `mod` : 模组功能
+- `mods` : 内置模组
+- `tools` : 工具
+- `other` : 其他
 
 ### 提交示例
 
