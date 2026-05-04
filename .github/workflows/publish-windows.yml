@@ -27,15 +27,14 @@ jobs:
           -c Release `
           -r win-x64 `
           -p:PublishAot=true `
-          -p:OutputType=Library `
-          -o publish/win-x64
+          -p:OutputType=Library
     
     - name: List published files
-      run: dir publish\win-x64
+      run: dir io.github.deplayeris.coffeeirc\bin\Release\net10.0\win-x64\native
     
     - name: Create ZIP archive
       run: |
-        Compress-Archive -Path publish/win-x64/* -DestinationPath coffeeirc-windows-x64.zip
+        Compress-Archive -Path io.github.deplayeris.coffeeirc/bin/Release/net10.0/win-x64/native/* -DestinationPath coffeeirc-windows-x64.zip
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
