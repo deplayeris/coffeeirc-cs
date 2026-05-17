@@ -16,3 +16,5 @@ index.md
 /cicjavasrc
 *.DotSettings.user
 /publish
+/artifacts
+/tools

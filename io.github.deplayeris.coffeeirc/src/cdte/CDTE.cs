@@ -21,6 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using io.github.deplayeris.coffeeirc.client;
 
 namespace io.github.deplayeris.coffeeirc.cdte;
