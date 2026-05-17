@@ -21,7 +21,7 @@ jobs:
     - name: Install NativeAOT dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang zlib1g-dev
+        sudo apt-get install -y clang zlib1g-dev gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
     
     - name: Install Cake.Tool
       run: dotnet tool install -g Cake.Tool --version 4.0.0

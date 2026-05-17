@@ -200,6 +200,8 @@ Task("Publish-Linux-Arm64")
         }
         .WithProperty("PublishAot", "true")
         .WithProperty("OutputType", "Library")
+        .WithProperty("CppCompilerAndLinker", "clang")
+        .WithProperty("ClangFlags", "--target=aarch64-linux-gnu")
     });
     
     Information($"Published to: {outputPath}");
