@@ -84,20 +84,16 @@ Task("Publish-Linux")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-x64/native";
-    
     DotNetPublish(projectPath, new DotNetPublishSettings {
         Configuration = configuration,
         Runtime = "linux-x64",
-        OutputDirectory = outputPath,
         MSBuildSettings = new DotNetMSBuildSettings {
             MaxCpuCount = 1
         }
         .WithProperty("PublishAot", "true")
-        .WithProperty("OutputType", "Library")
     });
     
-    Information($"Published to: {outputPath}");
+    Information($"Published successfully");
 });
 
 Task("Publish-Windows")
@@ -105,20 +101,16 @@ Task("Publish-Windows")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-x64/native";
-    
     DotNetPublish(projectPath, new DotNetPublishSettings {
         Configuration = configuration,
         Runtime = "win-x64",
-        OutputDirectory = outputPath,
         MSBuildSettings = new DotNetMSBuildSettings {
             MaxCpuCount = 1
         }
         .WithProperty("PublishAot", "true")
-        .WithProperty("OutputType", "Library")
     });
     
-    Information($"Published to: {outputPath}");
+    Information($"Published successfully");
 });
 
 Task("Publish-Windows-Arm64")
@@ -126,20 +118,16 @@ Task("Publish-Windows-Arm64")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-arm64/native";
-    
     DotNetPublish(projectPath, new DotNetPublishSettings {
         Configuration = configuration,
         Runtime = "win-arm64",
-        OutputDirectory = outputPath,
         MSBuildSettings = new DotNetMSBuildSettings {
             MaxCpuCount = 1
         }
         .WithProperty("PublishAot", "true")
-        .WithProperty("OutputType", "Library")
     });
     
-    Information($"Published to: {outputPath}");
+    Information($"Published successfully");
 });
 
 Task("Publish-MacOS-x64")
@@ -147,20 +135,16 @@ Task("Publish-MacOS-x64")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/osx-x64/native";
-    
     DotNetPublish(projectPath, new DotNetPublishSettings {
         Configuration = configuration,
         Runtime = "osx-x64",
-        OutputDirectory = outputPath,
         MSBuildSettings = new DotNetMSBuildSettings {
             MaxCpuCount = 1
         }
         .WithProperty("PublishAot", "true")
-        .WithProperty("OutputType", "Library")
     });
     
-    Information($"Published to: {outputPath}");
+    Information($"Published successfully");
 });
 
 Task("Publish-MacOS-Arm64")
@@ -168,20 +152,16 @@ Task("Publish-MacOS-Arm64")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/osx-arm64/native";
-    
     DotNetPublish(projectPath, new DotNetPublishSettings {
         Configuration = configuration,
         Runtime = "osx-arm64",
-        OutputDirectory = outputPath,
         MSBuildSettings = new DotNetMSBuildSettings {
             MaxCpuCount = 1
         }
         .WithProperty("PublishAot", "true")
-        .WithProperty("OutputType", "Library")
     });
     
-    Information($"Published to: {outputPath}");
+    Information($"Published successfully");
 });
 
 Task("Publish-Linux-Arm64")
@@ -189,22 +169,18 @@ Task("Publish-Linux-Arm64")
     .IsDependentOn("Build")
     .Does(() =>
 {
-    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-arm64/native";
-    
     DotNetPublish(projectPath, new DotNetPublishSettings {
         Configuration = configuration,
         Runtime = "linux-arm64",
-        OutputDirectory = outputPath,
         MSBuildSettings = new DotNetMSBuildSettings {
             MaxCpuCount = 1
         }
         .WithProperty("PublishAot", "true")
-        .WithProperty("OutputType", "Library")
         .WithProperty("CppCompilerAndLinker", "clang")
         .WithProperty("ClangFlags", "--target=aarch64-linux-gnu")
     });
     
-    Information($"Published to: {outputPath}");
+    Information($"Published successfully");
 });
 
 Task("Package-Linux")
@@ -212,10 +188,18 @@ Task("Package-Linux")
     .IsDependentOn("Publish-Linux")
     .Does(() =>
 {
-    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-x64/native";
+    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-x64/publish";
     var outputFile = "./artifacts/coffeeirc-linux-x64.tar.gz";
     
     EnsureDirectoryExists("./artifacts");
+    
+    // 列出 native 文件夹内容
+    Information($"Listing files in: {sourceDir}");
+    var files = GetFiles($"{sourceDir}/*");
+    foreach(var file in files)
+    {
+        Information($"  Found: {file.GetFilename()}");
+    }
     
     if (IsRunningOnUnix())
     {
@@ -233,10 +217,17 @@ Task("Package-Linux-Arm64")
     .IsDependentOn("Publish-Linux-Arm64")
     .Does(() =>
 {
-    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-arm64/native";
+    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-arm64/publish";
     var outputFile = "./artifacts/coffeeirc-linux-arm64.tar.gz";
     
     EnsureDirectoryExists("./artifacts");
+    
+    Information($"Listing files in: {sourceDir}");
+    var files = GetFiles($"{sourceDir}/*");
+    foreach(var file in files)
+    {
+        Information($"  Found: {file.GetFilename()}");
+    }
     
     if (IsRunningOnUnix())
     {
@@ -254,10 +245,17 @@ Task("Package-Windows")
     .IsDependentOn("Publish-Windows")
     .Does(() =>
 {
-    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-x64/native";
+    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-x64/publish";
     var outputFile = "./artifacts/coffeeirc-windows-x64.zip";
     
     EnsureDirectoryExists("./artifacts");
+    
+    Information($"Listing files in: {sourceDir}");
+    var files = GetFiles($"{sourceDir}/*");
+    foreach(var file in files)
+    {
+        Information($"  Found: {file.GetFilename()}");
+    }
     
     Zip(sourceDir, outputFile);
     
@@ -269,10 +267,17 @@ Task("Package-Windows-Arm64")
     .IsDependentOn("Publish-Windows-Arm64")
     .Does(() =>
 {
-    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-arm64/native";
+    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-arm64/publish";
     var outputFile = "./artifacts/coffeeirc-windows-arm64.zip";
     
     EnsureDirectoryExists("./artifacts");
+    
+    Information($"Listing files in: {sourceDir}");
+    var files = GetFiles($"{sourceDir}/*");
+    foreach(var file in files)
+    {
+        Information($"  Found: {file.GetFilename()}");
+    }
     
     Zip(sourceDir, outputFile);
     
@@ -288,7 +293,7 @@ Task("Package-MacOS")
     EnsureDirectoryExists("./artifacts");
     
     // x64
-    var sourceDirX64 = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/osx-x64/native";
+    var sourceDirX64 = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/osx-x64/publish";
     var outputFileX64 = "./artifacts/coffeeirc-macos-x64.tar.gz";
     
     if (IsRunningOnUnix())
@@ -300,7 +305,7 @@ Task("Package-MacOS")
     }
     
     // ARM64
-    var sourceDirArm64 = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/osx-arm64/native";
+    var sourceDirArm64 = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/osx-arm64/publish";
     var outputFileArm64 = "./artifacts/coffeeirc-macos-arm64.tar.gz";
     
     if (IsRunningOnUnix())
