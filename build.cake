@@ -121,6 +121,27 @@ Task("Publish-Windows")
     Information($"Published to: {outputPath}");
 });
 
+Task("Publish-Windows-Arm64")
+    .Description("Publishes for Windows ARM64 with NativeAOT")
+    .IsDependentOn("Build")
+    .Does(() =>
+{
+    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-arm64/native";
+    
+    DotNetPublish(projectPath, new DotNetPublishSettings {
+        Configuration = configuration,
+        Runtime = "win-arm64",
+        OutputDirectory = outputPath,
+        MSBuildSettings = new DotNetMSBuildSettings {
+            MaxCpuCount = 1
+        }
+        .WithProperty("PublishAot", "true")
+        .WithProperty("OutputType", "Library")
+    });
+    
+    Information($"Published to: {outputPath}");
+});
+
 Task("Publish-MacOS-x64")
     .Description("Publishes for macOS x64 with NativeAOT")
     .IsDependentOn("Build")
@@ -163,6 +184,27 @@ Task("Publish-MacOS-Arm64")
     Information($"Published to: {outputPath}");
 });
 
+Task("Publish-Linux-Arm64")
+    .Description("Publishes for Linux ARM64 with NativeAOT")
+    .IsDependentOn("Build")
+    .Does(() =>
+{
+    var outputPath = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-arm64/native";
+    
+    DotNetPublish(projectPath, new DotNetPublishSettings {
+        Configuration = configuration,
+        Runtime = "linux-arm64",
+        OutputDirectory = outputPath,
+        MSBuildSettings = new DotNetMSBuildSettings {
+            MaxCpuCount = 1
+        }
+        .WithProperty("PublishAot", "true")
+        .WithProperty("OutputType", "Library")
+    });
+    
+    Information($"Published to: {outputPath}");
+});
+
 Task("Package-Linux")
     .Description("Creates tar.gz archive for Linux")
     .IsDependentOn("Publish-Linux")
@@ -184,6 +226,27 @@ Task("Package-Linux")
     Information($"Created package: {outputFile}");
 });
 
+Task("Package-Linux-Arm64")
+    .Description("Creates tar.gz archive for Linux ARM64")
+    .IsDependentOn("Publish-Linux-Arm64")
+    .Does(() =>
+{
+    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/linux-arm64/native";
+    var outputFile = "./artifacts/coffeeirc-linux-arm64.tar.gz";
+    
+    EnsureDirectoryExists("./artifacts");
+    
+    if (IsRunningOnUnix())
+    {
+        StartProcess("tar", new ProcessSettings {
+            Arguments = $"-czf {MakeAbsolute(File(outputFile)).FullPath} -C {MakeAbsolute(Directory(sourceDir)).FullPath} .",
+            WorkingDirectory = Directory(sourceDir)
+        });
+    }
+    
+    Information($"Created package: {outputFile}");
+});
+
 Task("Package-Windows")
     .Description("Creates ZIP archive for Windows")
     .IsDependentOn("Publish-Windows")
@@ -191,6 +254,21 @@ Task("Package-Windows")
 {
     var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-x64/native";
     var outputFile = "./artifacts/coffeeirc-windows-x64.zip";
+    
+    EnsureDirectoryExists("./artifacts");
+    
+    Zip(sourceDir, outputFile);
+    
+    Information($"Created package: {outputFile}");
+});
+
+Task("Package-Windows-Arm64")
+    .Description("Creates ZIP archive for Windows ARM64")
+    .IsDependentOn("Publish-Windows-Arm64")
+    .Does(() =>
+{
+    var sourceDir = $"./io.github.deplayeris.coffeeirc/bin/{configuration}/net10.0/win-arm64/native";
+    var outputFile = "./artifacts/coffeeirc-windows-arm64.zip";
     
     EnsureDirectoryExists("./artifacts");
     
@@ -237,7 +315,9 @@ Task("Package-MacOS")
 Task("Package-All")
     .Description("Creates packages for all platforms")
     .IsDependentOn("Package-Linux")
+    .IsDependentOn("Package-Linux-Arm64")
     .IsDependentOn("Package-Windows")
+    .IsDependentOn("Package-Windows-Arm64")
     .IsDependentOn("Package-MacOS");
 
 Task("CI")

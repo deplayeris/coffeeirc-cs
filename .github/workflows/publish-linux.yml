@@ -18,32 +18,20 @@ jobs:
       with:
         dotnet-version: '10.0.x'
     
-    - name: Restore dependencies
-      run: dotnet restore io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj
-    
     - name: Install NativeAOT dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y clang zlib1g-dev
     
-    - name: Publish for Linux x64 (NativeAOT)
-      run: |
-        dotnet publish io.github.deplayeris.coffeeirc/io.github.deplayeris.coffeeirc.csproj \
-          -c Release \
-          -r linux-x64 \
-          -p:PublishAot=true \
-          -p:OutputType=Library
+    - name: Install Cake.Tool
+      run: dotnet tool install -g Cake.Tool --version 4.0.0
     
-    - name: List published files
-      run: ls -lh io.github.deplayeris.coffeeirc/bin/Release/net10.0/linux-x64/native
-    
-    - name: Create tar.gz archive
-      run: |
-        cd io.github.deplayeris.coffeeirc/bin/Release/net10.0/linux-x64/native
-        tar -czf $GITHUB_WORKSPACE/coffeeirc-linux-x64.tar.gz *
+    - name: Publish and Package Linux x64
+      run: dotnet cake --target=Package-Linux
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: coffeeirc-linux-x64
-        path: coffeeirc-linux-x64.tar.gz
+        path: artifacts/coffeeirc-linux-x64.tar.gz
+        retention-days: 730

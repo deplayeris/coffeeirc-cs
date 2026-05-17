@@ -1,4 +1,4 @@
-name: Publish macOS
+name: Publish Windows ARM64
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  publish-macos:
-    runs-on: macos-latest
+  publish-windows-arm64:
+    runs-on: windows-latest
     
     steps:
     - uses: actions/checkout@v4
@@ -21,14 +21,12 @@ jobs:
     - name: Install Cake.Tool
       run: dotnet tool install -g Cake.Tool --version 4.0.0
     
-    - name: Publish and Package macOS (x64 + ARM64)
-      run: dotnet cake --target=Package-MacOS
+    - name: Publish and Package Windows ARM64
+      run: dotnet cake --target=Package-Windows-Arm64
     
-    - name: Upload artifacts
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: coffeeirc-macos
-        path: |
-          artifacts/coffeeirc-macos-x64.tar.gz
-          artifacts/coffeeirc-macos-arm64.tar.gz
+        name: coffeeirc-windows-arm64
+        path: artifacts/coffeeirc-windows-arm64.zip
         retention-days: 730

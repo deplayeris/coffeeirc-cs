@@ -1,4 +1,4 @@
-name: Publish macOS
+name: Publish Linux ARM64
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  publish-macos:
-    runs-on: macos-latest
+  publish-linux-arm64:
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
@@ -18,17 +18,20 @@ jobs:
       with:
         dotnet-version: '10.0.x'
     
+    - name: Install NativeAOT dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang zlib1g-dev
+    
     - name: Install Cake.Tool
       run: dotnet tool install -g Cake.Tool --version 4.0.0
     
-    - name: Publish and Package macOS (x64 + ARM64)
-      run: dotnet cake --target=Package-MacOS
+    - name: Publish and Package Linux ARM64
+      run: dotnet cake --target=Package-Linux-Arm64
     
-    - name: Upload artifacts
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: coffeeirc-macos
-        path: |
-          artifacts/coffeeirc-macos-x64.tar.gz
-          artifacts/coffeeirc-macos-arm64.tar.gz
+        name: coffeeirc-linux-arm64
+        path: artifacts/coffeeirc-linux-arm64.tar.gz
         retention-days: 730

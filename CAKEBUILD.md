@@ -24,6 +24,14 @@ chmod +x build.sh
 
 # 发布 Linux 版本
 ./build.sh --target=Publish-Linux
+./build.sh --target=Publish-Linux-Arm64
+
+# 发布 Windows 版本
+./build.sh --target=Publish-Windows
+./build.sh --target=Publish-Windows-Arm64
+
+# 发布 macOS 版本
+./build.sh --target=Publish-MacOS
 
 # 打包所有平台
 ./build.sh --target=Package-All
@@ -71,16 +79,20 @@ dotnet cake --target=Publish-Linux
 ### 发布任务（NativeAOT）
 
 - **Publish-Linux** - 发布 Linux x64 版本
+- **Publish-Linux-Arm64** - 发布 Linux ARM64 版本
 - **Publish-Windows** - 发布 Windows x64 版本
+- **Publish-Windows-Arm64** - 发布 Windows ARM64 版本
 - **Publish-MacOS-x64** - 发布 macOS x64 版本
 - **Publish-MacOS-Arm64** - 发布 macOS ARM64 版本
 
 ### 打包任务
 
-- **Package-Linux** - 创建 Linux tar.gz 包
-- **Package-Windows** - 创建 Windows ZIP 包
+- **Package-Linux** - 创建 Linux x64 tar.gz 包
+- **Package-Linux-Arm64** - 创建 Linux ARM64 tar.gz 包
+- **Package-Windows** - 创建 Windows x64 ZIP 包
+- **Package-Windows-Arm64** - 创建 Windows ARM64 ZIP 包
 - **Package-MacOS** - 创建 macOS tar.gz 包（x64 + ARM64）
-- **Package-All** - 打包所有平台
+- **Package-All** - 打包所有平台（5个架构）
 
 ### 组合任务
 
@@ -107,9 +119,11 @@ dotnet cake --target=Publish-Linux
 
 | GitHub Actions 工作流 | Cake 任务 |
 |---------------------|----------|
-| publish-linux.yml | `Publish-Linux` → `Package-Linux` |
-| publish-windows.yml | `Publish-Windows` → `Package-Windows` |
-| publish-macos.yml | `Publish-MacOS-x64` + `Publish-MacOS-Arm64` → `Package-MacOS` |
+| publish-linux.yml | `Package-Linux` |
+| publish-linux-arm64.yml | `Package-Linux-Arm64` |
+| publish-windows.yml | `Package-Windows` |
+| publish-windows-arm64.yml | `Package-Windows-Arm64` |
+| publish-macos.yml | `Package-MacOS` |
 
 ## 优势
 
