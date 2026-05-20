@@ -13,10 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup .NET
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x'
+        dotnet-quality: 'ga'
     
     - name: Install Cake.Tool
       run: dotnet tool install -g Cake.Tool --version 4.0.0
